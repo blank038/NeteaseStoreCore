@@ -1,0 +1,8 @@
+name: NeteaseStoreCore
+main: com.blank038.neteasestorecore.NeteaseStoreCore
+depend:
+  - AyCore
+version: ${version}
+commands:
+  nsc:
+    description: Command for NeteaseStoreCore.

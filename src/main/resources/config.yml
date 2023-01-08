@@ -1,0 +1,38 @@
+# 收货设定
+store_option:
+  game_id: 000000000
+  key: "xxxxxxxxxx"
+  # 链接地址
+  url:
+    get_order: "获取订单地址"
+    ship_order: "通知收货地址"
+# 玩家收货冷却时间, 单位: 秒
+store_delay: 10
+# 收货执行的命令, 取第一条来进行判断
+store_commands:
+  "points give %player% 100":
+    - "say 你好啊 %player%"
+# 订单记录
+record_option:
+  # 存储类型: MysQL, Yaml
+  type: MySQL
+  # 数据库链接
+  url: "jdbc:mysql://localhost/minecraft?useSSL=false"
+  # 用户名
+  user: root
+  # 密码
+  password: root
+# 提示文本
+message:
+  prefix: "&c收货小精灵 &f"
+  cooldown: "收货命令冷却中, 请等会噢(%cd%s)！"
+  query:
+    - "哔..哔.. 已经提交给小精灵二号了, 等待返回!"
+    - "呼呼, 我已经告诉小精灵二号啦, 耐心等待一会噢!"
+  no_store:
+    - "啊哦, 你好像还没有商品呢!"
+    - "抱歉.. 我没有找到你的商品呢."
+  received:
+    - "欧耶! 成功收货啦, 快去检查下叭!"
+    - "呐呐, 你的商品我帮你拿来啦, 快看看!"
+  reload: "插件配置重置完成."
