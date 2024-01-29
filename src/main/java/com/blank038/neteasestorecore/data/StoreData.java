@@ -9,50 +9,50 @@ import com.google.gson.JsonObject;
  * @since 2021-04-15
  */
 public class StoreData {
-    private final long ITEM_ID, ORDER_ID, BUY_TIME, GROUP_ID;
-    private final int ITEM_COUNT;
-    private final String PLAYER_UUID, CMD, ORIGINAL_DATA;
+    private final long itemId, orderId, buyTime, groupId;
+    private final int itemCount;
+    private final String playerUniqueId, cmd, originalData;
 
     public StoreData(JsonObject object) {
-        this.ORIGINAL_DATA = object.toString();
-        this.ITEM_COUNT = object.get("item_num").getAsInt();
-        this.GROUP_ID = object.get("group").getAsLong();
-        this.ITEM_ID = object.get("item_id").getAsLong();
-        this.ORDER_ID = object.get("orderid").getAsLong();
-        this.BUY_TIME = object.get("buy_time").getAsLong();
-        this.PLAYER_UUID = object.get("uuid").getAsString();
-        this.CMD = object.get("cmd").getAsString();
+        this.originalData = object.toString();
+        this.itemCount = object.get("item_num").getAsInt();
+        this.groupId = object.get("group").getAsLong();
+        this.itemId = object.get("item_id").getAsLong();
+        this.orderId = object.get("orderid").getAsLong();
+        this.buyTime = object.get("buy_time").getAsLong();
+        this.playerUniqueId = object.get("uuid").getAsString();
+        this.cmd = object.get("cmd").getAsString();
     }
 
     public long getItemId() {
-        return this.ITEM_ID;
+        return this.itemId;
     }
 
     public long getOrderId() {
-        return this.ORDER_ID;
+        return this.orderId;
     }
 
     public long getBuyTime() {
-        return this.BUY_TIME;
+        return this.buyTime;
     }
 
     public long getGroupId() {
-        return this.GROUP_ID;
+        return this.groupId;
     }
 
     public int getItemCount() {
-        return this.ITEM_COUNT;
+        return this.itemCount;
     }
 
     public String getPlayerUUID() {
-        return this.PLAYER_UUID;
+        return this.playerUniqueId;
     }
 
     public String getCommand() {
-        return this.CMD;
+        return this.cmd;
     }
 
     public String getoriginalData() {
-        return this.ORIGINAL_DATA;
+        return this.originalData;
     }
 }

@@ -16,7 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class NeteaseStoreCore extends JavaPlugin {
     private static NeteaseStoreCore instance;
 
-    private final StoreOption STORE_OPTION = new StoreOption();
+    private final StoreOption storeOption = new StoreOption();
     private IStoreRecord storeRecord;
 
     public static NeteaseStoreCore getInstance() {
@@ -24,7 +24,7 @@ public class NeteaseStoreCore extends JavaPlugin {
     }
 
     public StoreOption getStoreOption() {
-        return this.STORE_OPTION;
+        return this.storeOption;
     }
 
     public IStoreRecord getStoreRecord() {
@@ -62,7 +62,7 @@ public class NeteaseStoreCore extends JavaPlugin {
         super.saveDefaultConfig();
         super.reloadConfig();
         // 初始化数据
-        this.STORE_OPTION.init();
+        this.storeOption.init();
     }
 
     public static String getString(String key, boolean prefix) {

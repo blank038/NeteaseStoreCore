@@ -1,6 +1,7 @@
 package com.blank038.neteasestorecore.packet;
 
 import com.blank038.neteasestorecore.NeteaseStoreCore;
+import com.blank038.neteasestorecore.api.event.PlayerRechargeEvent;
 import com.blank038.neteasestorecore.data.StoreData;
 import com.blank038.neteasestorecore.util.CommonUtil;
 import com.google.gson.JsonArray;
@@ -18,6 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
 /**
  * 玩家领取商品, 通知网易服务器商品已处理
@@ -26,30 +28,30 @@ import java.util.UUID;
  * @since 2021-04-15
  */
 public class ShipOrderPacket implements Runnable {
-    private final String PLAYER_UUID;
-    private final List<StoreData> STORE_LIST;
-    private final long[] ORDER_ARRAY;
+    private final String playerUniqueId;
+    private final List<StoreData> storeList;
+    private final long[] orderArray;
 
     public ShipOrderPacket(String uuidStr, List<StoreData> storeList, long[] orderArray) {
-        this.PLAYER_UUID = uuidStr;
-        this.STORE_LIST = storeList;
-        this.ORDER_ARRAY = orderArray;
+        this.playerUniqueId = uuidStr;
+        this.storeList = storeList;
+        this.orderArray = orderArray;
         Bukkit.getScheduler().runTaskAsynchronously(NeteaseStoreCore.getInstance(), this);
     }
 
 
     @Override
     public void run() {
-        UUID uuid = UUID.fromString(this.PLAYER_UUID);
+        UUID uuid = UUID.fromString(this.playerUniqueId);
         Player player = Bukkit.getPlayer(uuid);
         // 确保玩家在线才提交商品
         if (player != null && player.isOnline()) {
             // 初始化数据
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("gameid", NeteaseStoreCore.getInstance().getStoreOption().getGameId());
-            jsonObject.addProperty("uuid", this.PLAYER_UUID);
+            jsonObject.addProperty("uuid", this.playerUniqueId);
             JsonArray array = new JsonArray();
-            Arrays.stream(this.ORDER_ARRAY).forEach(array::add);
+            Arrays.stream(this.orderArray).forEach(array::add);
             jsonObject.add("orderid_list", array);
             try {
                 // 发送请求
@@ -85,8 +87,12 @@ public class ShipOrderPacket implements Runnable {
                     int code = object.get("code").getAsInt();
                     if (code == 0) {
                         // 开始执行逻辑
-                        this.STORE_LIST.forEach((s) -> {
+                        this.storeList.forEach((s) -> {
                             Bukkit.getScheduler().runTask(NeteaseStoreCore.getInstance(), () -> {
+                                // 唤起事件
+                                PlayerRechargeEvent event = new PlayerRechargeEvent(player, s);
+                                Bukkit.getPluginManager().callEvent(event);
+                                // 执行命令
                                 for (int i = 0; i < s.getItemCount(); i++) {
                                     Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), s.getCommand().replace("%player%", player.getName()));
                                     // 执行自定义命令逻辑, 如果无则是空集合
@@ -104,11 +110,11 @@ public class ShipOrderPacket implements Runnable {
                         // 发送随机字段
                         player.sendMessage(NeteaseStoreCore.getString("message.prefix", false)
                                 + CommonUtil.randomString(NeteaseStoreCore.getInstance().getConfig().getStringList("message.no_store")));
-                        NeteaseStoreCore.getInstance().getLogger().info("通知收货异常 " + this.PLAYER_UUID + "(" + code + ") -> " + object);
+                        NeteaseStoreCore.getInstance().getLogger().info("通知收货异常 " + this.playerUniqueId + "(" + code + ") -> " + object);
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                NeteaseStoreCore.getInstance().getLogger().log(Level.WARNING, e, () -> "通知收货异常, 玩家 UUID: " + this.playerUniqueId);
             }
         }
     }

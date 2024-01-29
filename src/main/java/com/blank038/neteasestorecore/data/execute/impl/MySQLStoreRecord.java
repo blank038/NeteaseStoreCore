@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.sql.SQLException;
+import java.util.logging.Level;
 
 /**
  * @author Blank038
@@ -16,24 +17,24 @@ import java.sql.SQLException;
 public class MySQLStoreRecord implements IStoreRecord {
     public static boolean SQL_STATUS = false;
 
-    private final MySqlStorageHandler DATA_SOURCE;
-    private final Gson GSON = new GsonBuilder().create();
+    private final MySqlStorageHandler dataSource;
+    private final Gson gson = new GsonBuilder().create();
 
     public MySQLStoreRecord() {
         String[] sqlArray = {
                 "CREATE TABLE IF NOT EXISTS netease_store_record (order_id BIGINT, item_num INT, group_id BIGINT, item_id BIGINT, buy_time BIGINT, " +
                         "player VARCHAR(30) NOT NULL, uuid VARCHAR(40) NOT NULL, original_data TEXT, PRIMARY KEY ( order_id ))"
         };
-        this.DATA_SOURCE = new MySqlStorageHandler(NeteaseStoreCore.getInstance(), NeteaseStoreCore.getInstance().getConfig().getString("record_option.url"),
+        this.dataSource = new MySqlStorageHandler(NeteaseStoreCore.getInstance(), NeteaseStoreCore.getInstance().getConfig().getString("record_option.url"),
                 NeteaseStoreCore.getInstance().getConfig().getString("record_option.user"), NeteaseStoreCore.getInstance().getConfig().getString("record_option.password"), sqlArray);
-        this.DATA_SOURCE.setReconnectionQueryTable("netease_store_record");
-        this.DATA_SOURCE.setCheckConnection(true);
+        this.dataSource.setReconnectionQueryTable("netease_store_record");
+        this.dataSource.setCheckConnection(true);
         SQL_STATUS = true;
     }
 
     @Override
     public void recordStore(String playerName, StoreData storeData) {
-        this.DATA_SOURCE.connect((statement) -> {
+        this.dataSource.connect((statement) -> {
             try {
                 statement.setLong(1, storeData.getOrderId());
                 statement.setInt(2, storeData.getItemCount());
@@ -45,7 +46,7 @@ public class MySQLStoreRecord implements IStoreRecord {
                 statement.setString(8, storeData.getoriginalData());
                 statement.executeUpdate();
             } catch (SQLException e) {
-                e.printStackTrace();
+                NeteaseStoreCore.getInstance().getLogger().log(Level.WARNING, e, () -> "写入数据出现异常, 订单号: " + storeData.getOrderId());
             }
         }, "INSERT INTO netease_store_record (order_id,item_num,group_id,item_id,buy_time,player,uuid,original_data) VALUES (?,?,?,?,?,?,?,?)");
     }

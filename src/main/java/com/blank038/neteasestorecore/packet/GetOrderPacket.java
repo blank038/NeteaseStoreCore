@@ -18,16 +18,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
 
 /**
  * @author Blank038
  * @since 2021-04-15
  */
 public class GetOrderPacket implements Runnable {
-    private final String PLAYER_UUID;
+    private final String playerUniqueId;
 
     public GetOrderPacket(Player player) {
-        this.PLAYER_UUID = player.getUniqueId().toString();
+        this.playerUniqueId = player.getUniqueId().toString();
         Bukkit.getScheduler().runTaskAsynchronously(NeteaseStoreCore.getInstance(), this);
     }
 
@@ -37,7 +38,7 @@ public class GetOrderPacket implements Runnable {
         // 初始化数据
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("gameid", NeteaseStoreCore.getInstance().getStoreOption().getGameId());
-        jsonObject.addProperty("uuid", this.PLAYER_UUID);
+        jsonObject.addProperty("uuid", this.playerUniqueId);
         try {
             // 发送请求
             URL url = new URL(NeteaseStoreCore.getInstance().getStoreOption().getOrderUrl());
@@ -73,7 +74,7 @@ public class GetOrderPacket implements Runnable {
                 // 成功返回, 开始执行业务逻辑
                 JsonArray array = object.getAsJsonArray("entities");
                 if (array.size() == 0) {
-                    Player player = Bukkit.getPlayer(UUID.fromString(this.PLAYER_UUID));
+                    Player player = Bukkit.getPlayer(UUID.fromString(this.playerUniqueId));
                     if (player != null && player.isOnline()) {
                         // 发送随机字段
                         player.sendMessage(NeteaseStoreCore.getString("message.prefix", false)
@@ -93,18 +94,18 @@ public class GetOrderPacket implements Runnable {
                     orderArray[i] = storeData.getOrderId();
                 }
                 // 发送数据
-                new ShipOrderPacket(this.PLAYER_UUID, storeList, orderArray);
+                new ShipOrderPacket(this.playerUniqueId, storeList, orderArray);
             } else {
-                Player player = Bukkit.getPlayer(UUID.fromString(this.PLAYER_UUID));
+                Player player = Bukkit.getPlayer(UUID.fromString(this.playerUniqueId));
                 if (player != null && player.isOnline()) {
                     // 发送随机字段
                     player.sendMessage(NeteaseStoreCore.getString("message.prefix", false)
                             + CommonUtil.randomString(NeteaseStoreCore.getInstance().getConfig().getStringList("message.no_store")));
                 }
-                NeteaseStoreCore.getInstance().getLogger().info("查询收货异常 " + this.PLAYER_UUID + " -> " + object);
+                NeteaseStoreCore.getInstance().getLogger().info("查询收货异常 " + this.playerUniqueId + " -> " + object);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            NeteaseStoreCore.getInstance().getLogger().log(Level.WARNING, e, () -> "查询收货异常, 玩家 UUID: " + this.playerUniqueId);
         }
     }
 }

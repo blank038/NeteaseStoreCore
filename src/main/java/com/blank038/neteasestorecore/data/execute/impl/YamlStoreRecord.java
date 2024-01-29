@@ -8,6 +8,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
 
 /**
  * @author Blank038
@@ -33,7 +34,7 @@ public class YamlStoreRecord implements IStoreRecord {
         try {
             data.save(target);
         } catch (IOException e) {
-            e.printStackTrace();
+            NeteaseStoreCore.getInstance().getLogger().log(Level.WARNING, e, () -> "写入数据出现异常, 订单号: " + storeData.getOrderId());
         }
     }
 }
